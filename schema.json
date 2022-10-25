@@ -1,0 +1,92 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "title",
+    "questions"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "title": { "type": "string" },
+    "questions": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "type",
+              "name"
+            ],
+            "properties": {
+              "type": { "type": "string", "enum": ["text"] },
+              "name": { "type": "string" }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "type",
+              "name"
+            ],
+            "properties": {
+              "type": { "type": "string", "enum": ["textarea"] },
+              "name": { "type": "string" }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "type",
+              "name"
+            ],
+            "properties": {
+              "type": { "type": "string", "enum": ["email"] },
+              "name": { "type": "string" }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "type",
+              "name",
+              "values"
+            ],
+            "properties": {
+              "type": { "type": "string", "enum": ["radio"] },
+              "name": { "type": "string" },
+              "values": { "type": "array", "items": { "type": "string" } }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "type",
+              "name"
+            ],
+            "properties": {
+              "type": { "type": "string", "enum": ["checkbox"] },
+              "name": { "type": "string" }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "type",
+              "name"
+            ],
+            "properties": {
+              "type": { "type": "string", "enum": ["range"] },
+              "name": { "type": "string" },
+              "min": { "type": "number" },
+              "max": { "type": "number" },
+              "value": { "type": "number" }
+            }
+          }
+        ]
+      }
+    }
+  }
+}
