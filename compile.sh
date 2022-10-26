@@ -6,4 +6,6 @@ deno compile --allow-net --unstable --no-check --lite  --output bin/sirvey-aarch
 deno compile --allow-net --unstable --no-check --lite  --output bin/sirvey-x86_64-linux   --target x86_64-unknown-linux-gnu sirvey.ts
 deno compile --allow-net --unstable --no-check --lite  --output bin/sirvey-x86_64-macos   --target x86_64-apple-darwin      sirvey.ts
 deno compile --allow-net --unstable --no-check --lite  --output bin/sirvey-x86_64-windows --target x86_64-pc-windows-msvc   sirvey.ts
-deno upgrade
+if  [[ -z "${GITHUB_ACTION}" ]]; then
+    deno upgrade
+fi
