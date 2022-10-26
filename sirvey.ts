@@ -12,6 +12,7 @@ import {
   renderHTML,
 } from "https://deno.land/x/hyperactive@v2.0.0-alpha.14/mod.ts";
 import pub from "./public.b.ts";
+import { readAll } from "https://deno.land/std@0.160.0/streams/mod.ts";
 
 const mimeMap = {
   ".css": "text/css",
@@ -19,15 +20,9 @@ const mimeMap = {
 
 console.error("Waiting for survey json on stdin...");
 
-let _spec = "";
-
-const buf = new Uint8Array(1024);
-let bytesRead: number | null = 0;
-while ((bytesRead = await Deno.stdin.read(buf)) != null) {
-  _spec += new TextDecoder().decode(buf.subarray(0, bytesRead));
-}
-
-const spec: Survey = JSON.parse(_spec);
+const spec: Survey = JSON.parse(
+  new TextDecoder().decode(await readAll(Deno.stdin)),
+);
 
 const columns = spec.questions.map((q) => q.name);
 
