@@ -1,33 +1,15 @@
-// deno run --allow-write=package.json,package-lock.json,public,node_modules --allow-read=node_modules --allow-run=cmd,npm build.ts
+// deno run --allow-write=public --allow-net=unpkg.com --allow-run=cmd,deno build.ts
 
-await Deno.writeTextFile(
-  "package.json",
-  JSON.stringify({
-    dependencies: {
-      "@picocss/pico": "^1.5.6",
-    },
-  }),
-);
-if (
-  !(await Deno.run({
-    cmd: [
-      ...Deno.build.os === "windows" ? ["cmd", "/c"] : [],
-      "npm",
-      "install",
-    ],
-  }).status()).success
-) {
-  throw new Error("npm install failed");
-}
-await Deno.remove("package.json").catch(() => {});
-await Deno.remove("package-lock.json").catch(() => {});
 await Deno.remove("public", { recursive: true }).catch(() => {});
 await Deno.mkdir("public/css", { recursive: true });
-await Deno.copyFile(
-  "node_modules/@picocss/pico/css/pico.min.css",
-  "public/css/pico.min.css",
+
+const res = await fetch(
+  "https://unpkg.com/@picocss/pico@1.5.6/css/pico.min.css",
 );
-await Deno.remove("node_modules", { recursive: true }).catch(() => {});
+await Deno.writeFile(
+  "public/css/pico.min.css",
+  new Uint8Array(await res.arrayBuffer()),
+);
 if (
   !(await Deno.run({
     cmd: [
