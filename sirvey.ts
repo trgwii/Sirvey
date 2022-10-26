@@ -17,6 +17,8 @@ const mimeMap = {
   ".css": "text/css",
 };
 
+console.error("Waiting for survey json on stdin...");
+
 let _spec = "";
 
 const buf = new Uint8Array(1024);
@@ -28,6 +30,8 @@ while ((bytesRead = await Deno.stdin.read(buf)) != null) {
 const spec: Survey = JSON.parse(_spec);
 
 const columns = spec.questions.map((q) => q.name);
+
+console.error("Loaded survey: " + spec.title);
 
 console.log(columns.join(";"));
 

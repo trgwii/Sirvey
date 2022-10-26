@@ -1,3 +1,4 @@
 public
 *.b.ts
 spec.json
+bin
