@@ -1,8 +1,8 @@
 // deno run --allow-net=127.0.0.1:8080 sirvey.ts < spec.json
 
 const listener = Deno.listen({
-  hostname: "127.0.0.1",
   port: Number(Deno.args[0] ?? 8080),
+  hostname: Deno.args[1] ?? "127.0.0.1",
 });
 
 import type { Survey } from "./schema.ts";
@@ -50,8 +50,49 @@ const handler = async (conn: Deno.Conn) => {
         continue;
       }
     }
+    if (url.pathname === "/thankyou") {
+      e.respondWith(
+        new Response(
+          "<!DOCTYPE html>" + renderHTML(dom.html(
+            dom.head(
+              dom.meta({ charset: "utf-8" }),
+              dom.title(spec.title),
+              dom.link({ rel: "stylesheet", href: "/css/pico.min.css" }),
+              dom.meta({
+                name: "viewport",
+                content: "width=device-width, initial-scale=1.0",
+              }),
+              ...spec.author
+                ? [dom.meta({ name: "author", content: spec.author })]
+                : [],
+              ...spec.keywords && spec.keywords.length > 0
+                ? [
+                  dom.meta({
+                    name: "keywords",
+                    content: spec.keywords.join(", "),
+                  }),
+                ]
+                : [],
+              ...spec.description
+                ? [dom.meta({ name: "description", content: spec.description })]
+                : [],
+            ),
+            dom.body(dom.main(
+              { class: "container" },
+              dom.div(
+                { class: "headings" },
+                dom.h2("Thank you!"),
+                dom.h3("Thanks for filling out this survey"),
+              ),
+              dom.p(dom.a({ href: "/" }, "Back to survey")),
+            )),
+          )),
+          { headers: { "Content-Type": "text/html" } },
+        ),
+      );
+      continue;
+    }
     if (e.request.method === "POST" && url.pathname === "/submit") {
-      e.request.text;
       const rawSurveyResponse = await e.request.text();
       const values = Object.fromEntries(
         rawSurveyResponse.split("&").map((pair) => pair.split("=")),
@@ -67,7 +108,7 @@ const handler = async (conn: Deno.Conn) => {
       );
 
       e.respondWith(
-        new Response(null, { status: 302, headers: { Location: "/" } }),
+        new Response(null, { status: 302, headers: { Location: "/thankyou" } }),
       );
       continue;
     }
@@ -78,10 +119,36 @@ const handler = async (conn: Deno.Conn) => {
             dom.meta({ charset: "utf-8" }),
             dom.title(spec.title),
             dom.link({ rel: "stylesheet", href: "/css/pico.min.css" }),
+            dom.meta({
+              name: "viewport",
+              content: "width=device-width, initial-scale=1.0",
+            }),
+            ...spec.author
+              ? [dom.meta({ name: "author", content: spec.author })]
+              : [],
+            ...spec.keywords && spec.keywords.length > 0
+              ? [
+                dom.meta({
+                  name: "keywords",
+                  content: spec.keywords.join(", "),
+                }),
+              ]
+              : [],
+            ...spec.description
+              ? [dom.meta({ name: "description", content: spec.description })]
+              : [],
           ),
           dom.body(
             dom.main(
               { class: "container" },
+              (spec.subtitle || spec.description)
+                ? dom.div(
+                  { class: "headings" },
+                  dom.h2(spec.title),
+                  ...spec.subtitle ? [dom.h3(spec.subtitle)] : [],
+                  ...spec.description ? [dom.h4(spec.description)] : [],
+                )
+                : dom.h3(spec.title),
               dom.form(
                 { action: "/submit", method: "POST" },
                 ...spec.questions.map((question) => {
@@ -93,8 +160,11 @@ const handler = async (conn: Deno.Conn) => {
                         type: "text",
                         id: question.name,
                         name: question.name,
-                        placeholder: question.name,
+                        placeholder: question.placeholder ?? question.name,
                       }),
+                      ...question.description
+                        ? [dom.small(question.description)]
+                        : [],
                     );
                   }
                   if (question.type === "textarea") {
@@ -104,8 +174,11 @@ const handler = async (conn: Deno.Conn) => {
                       dom.textarea({
                         id: question.name,
                         name: question.name,
-                        placeholder: question.name,
+                        placeholder: question.placeholder ?? question.name,
                       }),
+                      ...question.description
+                        ? [dom.small(question.description)]
+                        : [],
                     );
                   }
                   if (question.type === "email") {
@@ -116,8 +189,11 @@ const handler = async (conn: Deno.Conn) => {
                         type: "email",
                         id: question.name,
                         name: question.name,
-                        placeholder: question.name,
+                        placeholder: question.placeholder ?? question.name,
                       }),
+                      ...question.description
+                        ? [dom.small(question.description)]
+                        : [],
                     );
                   }
                   if (question.type === "radio") {
@@ -138,6 +214,9 @@ const handler = async (conn: Deno.Conn) => {
                           value,
                         )
                       ),
+                      ...question.description
+                        ? [dom.small(question.description)]
+                        : [],
                     );
                   }
                   if (question.type === "checkbox") {
@@ -151,6 +230,9 @@ const handler = async (conn: Deno.Conn) => {
                         }),
                         question.name,
                       ),
+                      ...question.description
+                        ? [dom.small(question.description)]
+                        : [],
                     );
                   }
                   if (question.type === "range") {
@@ -165,6 +247,9 @@ const handler = async (conn: Deno.Conn) => {
                         max: question.max,
                         value: String(question.value),
                       }),
+                      ...question.description
+                        ? [dom.small(question.description)]
+                        : [],
                     );
                   }
                   return dom.p(
