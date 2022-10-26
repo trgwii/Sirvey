@@ -1,0 +1,26 @@
+name: Build
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: denoland/setup-deno@v1
+        with:
+          deno-version: "1.9.2"
+      - run: ./compile.sh
+      - uses: actions/upload-artifact@v3
+        with:
+          name: sirvey-aarch64-macos
+          path: bin/sirvey-aarch64-macos
+      - uses: actions/upload-artifact@v3
+        with:
+          name: sirvey-x86_64-linux
+          path: bin/sirvey-x86_64-linux
+      - uses: actions/upload-artifact@v3
+        with:
+          name: sirvey-x86_64-macos
+          path: bin/sirvey-x86_64-macos
+      - uses: actions/upload-artifact@v3
+        with:
+          name: sirvey-x86_64-windows
+          path: bin/sirvey-x86_64-windows.exe
