@@ -78,12 +78,9 @@ const handler = async (conn: Deno.Conn) => {
             ),
             dom.body(dom.main(
               { class: "container" },
-              dom.div(
-                { class: "headings" },
-                dom.h2("Thank you!"),
-                dom.h3("Thanks for filling out this survey"),
-              ),
-              dom.p(dom.a({ href: "/" }, "Back to survey")),
+              dom.h2("Survey successfully submitted"),
+              dom.p("Thank you for taking the time to fill this out!"),
+              dom.small(dom.a({ href: "/" }, "Back to survey")),
             )),
           )),
           { headers: { "Content-Type": "text/html" } },
@@ -139,125 +136,129 @@ const handler = async (conn: Deno.Conn) => {
           ),
           dom.body(
             dom.main(
-              { class: "container" },
-              (spec.subtitle || spec.description)
-                ? dom.div(
-                  { class: "headings" },
-                  dom.h2(spec.title),
-                  ...spec.subtitle ? [dom.h3(spec.subtitle)] : [],
-                  ...spec.description ? [dom.h4(spec.description)] : [],
-                )
-                : dom.h3(spec.title),
-              dom.form(
-                { action: "/submit", method: "POST" },
-                ...spec.questions.map((question) => {
-                  if (question.type === "text") {
-                    return dom.label(
-                      { for: question.name },
-                      question.name,
-                      dom.input({
-                        type: "text",
-                        id: question.name,
-                        name: question.name,
-                        placeholder: question.placeholder ?? question.name,
-                      }),
-                      ...question.description
-                        ? [dom.small(question.description)]
-                        : [],
-                    );
-                  }
-                  if (question.type === "textarea") {
-                    return dom.label(
-                      { for: question.name },
-                      question.name,
-                      dom.textarea({
-                        id: question.name,
-                        name: question.name,
-                        placeholder: question.placeholder ?? question.name,
-                      }),
-                      ...question.description
-                        ? [dom.small(question.description)]
-                        : [],
-                    );
-                  }
-                  if (question.type === "email") {
-                    return dom.label(
-                      { for: question.name },
-                      question.name,
-                      dom.input({
-                        type: "email",
-                        id: question.name,
-                        name: question.name,
-                        placeholder: question.placeholder ?? question.name,
-                      }),
-                      ...question.description
-                        ? [dom.small(question.description)]
-                        : [],
-                    );
-                  }
-                  if (question.type === "radio") {
-                    return dom.fieldset(
-                      dom.legend(
+              dom.section(
+                (spec.subtitle || spec.description)
+                  ? dom.hgroup(
+                    dom.h2(spec.title),
+                    ...spec.subtitle ? [dom.h3(spec.subtitle)] : []
+                  )
+                  : dom.h3(spec.title),
+              ),
+              dom.section(
+                dom.p(spec.description)
+              ),
+              dom.section(
+                dom.form(
+                  { action: "/submit", method: "POST" },
+                  ...spec.questions.map((question) => {
+                    if (question.type === "text") {
+                      return dom.label(
+                        { for: question.name },
                         question.name,
-                      ),
-                      ...question.values.map((value, i) =>
+                        dom.input({
+                          type: "text",
+                          id: question.name,
+                          name: question.name,
+                          placeholder: question.placeholder ?? question.name,
+                        }),
+                        ...question.description
+                          ? [dom.small(question.description)]
+                          : [],
+                      );
+                    }
+                    if (question.type === "textarea") {
+                      return dom.label(
+                        { for: question.name },
+                        question.name,
+                        dom.textarea({
+                          id: question.name,
+                          name: question.name,
+                          placeholder: question.placeholder ?? question.name,
+                        }),
+                        ...question.description
+                          ? [dom.small(question.description)]
+                          : [],
+                      );
+                    }
+                    if (question.type === "email") {
+                      return dom.label(
+                        { for: question.name },
+                        question.name,
+                        dom.input({
+                          type: "email",
+                          id: question.name,
+                          name: question.name,
+                          placeholder: question.placeholder ?? question.name,
+                        }),
+                        ...question.description
+                          ? [dom.small(question.description)]
+                          : [],
+                      );
+                    }
+                    if (question.type === "radio") {
+                      return dom.fieldset(
+                        dom.legend(
+                          question.name,
+                        ),
+                        ...question.values.map((value, i) =>
+                          dom.label(
+                            { for: question.name },
+                            dom.input({
+                              type: "radio",
+                              id: question.name,
+                              name: question.name,
+                              value,
+                              ...i === 0 ? { checked: true } : {},
+                            }),
+                            value,
+                          )
+                                              ),
+                        ...question.description
+                          ? [dom.small(question.description)]
+                          : [],
+                      );
+                    }
+                    if (question.type === "checkbox") {
+                      return dom.fieldset(
                         dom.label(
                           { for: question.name },
                           dom.input({
-                            type: "radio",
+                            type: "checkbox",
                             id: question.name,
                             name: question.name,
-                            value,
-                            ...i === 0 ? { checked: true } : {},
                           }),
-                          value,
-                        )
-                      ),
-                      ...question.description
-                        ? [dom.small(question.description)]
-                        : [],
-                    );
-                  }
-                  if (question.type === "checkbox") {
-                    return dom.fieldset(
-                      dom.label(
+                          question.name,
+                        ),
+                        ...question.description
+                          ? [dom.small(question.description)]
+                          : [],
+                      );
+                    }
+                    if (question.type === "range") {
+                      return dom.label(
                         { for: question.name },
+                        question.name,
                         dom.input({
-                          type: "checkbox",
+                          type: "range",
                           id: question.name,
                           name: question.name,
+                          min: question.min,
+                          max: question.max,
+                          value: String(question.value),
                         }),
-                        question.name,
-                      ),
-                      ...question.description
-                        ? [dom.small(question.description)]
-                        : [],
+                        ...question.description
+                          ? [dom.small(question.description)]
+                          : [],
+                      );
+                    }
+                    return dom.p(
+                      "Unknown question:",
+                      dom.br(),
+                      dom.pre(JSON.stringify(question, null, "  ")),
                     );
-                  }
-                  if (question.type === "range") {
-                    return dom.label(
-                      { for: question.name },
-                      question.name,
-                      dom.input({
-                        type: "range",
-                        id: question.name,
-                        name: question.name,
-                        min: question.min,
-                        max: question.max,
-                        value: String(question.value),
-                      }),
-                      ...question.description
-                        ? [dom.small(question.description)]
-                        : [],
-                    );
-                  }
-                  return dom.p(
-                    "Unknown question:",
-                    dom.br(),
-                    dom.pre(JSON.stringify(question, null, "  ")),
-                  );
-                }),
-                dom.input({ type: "submit", value: "Submit" }),
+                  }),
+                  dom.input({ type: "submit", value: "Submit" }),
+                ),
               ),
             ),
           ),
