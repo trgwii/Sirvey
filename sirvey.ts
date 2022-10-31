@@ -136,16 +136,17 @@ const handler = async (conn: Deno.Conn) => {
           ),
           dom.body(
             dom.main(
+              { class: "container" },
               dom.section(
                 (spec.subtitle || spec.description)
                   ? dom.hgroup(
                     dom.h2(spec.title),
-                    ...spec.subtitle ? [dom.h3(spec.subtitle)] : []
+                    ...spec.subtitle ? [dom.h3(spec.subtitle)] : [],
                   )
                   : dom.h3(spec.title),
               ),
               dom.section(
-                dom.p(spec.description)
+                dom.p(spec.description),
               ),
               dom.section(
                 dom.form(
@@ -212,7 +213,7 @@ const handler = async (conn: Deno.Conn) => {
                             }),
                             value,
                           )
-                                              ),
+                        ),
                         ...question.description
                           ? [dom.small(question.description)]
                           : [],
